@@ -49,6 +49,16 @@ Flurry.main = function()
         Flurry.renderer.canvas.height = 0;
         Flurry.renderer.resize();
     }, 100);
+
+    Flurry.renderer.canvas.ondblclick = function()
+    {
+        var b = document.body;
+        // Fullscreen API is currently vendor prefixed
+        if      (b.requestFullscreen)       b.requestFullscreen();
+        else if (b.mozRequestFullScreen)    b.mozRequestFullScreen();
+        else if (b.webkitRequestFullscreen) b.webkitRequestFullscreen();
+        else if (b.msRequestFullScreen)     b.msRequestFullScreen();
+    };
 };
 
 Flurry.setupGui = function()
@@ -103,6 +113,7 @@ Flurry.setupGui = function()
 
 Flurry.toggleGui = function()
 {
+    Flurry.renderer.canvas.className    = Flurry.gui.hidden ? 'uiVisible' : '';
     Flurry.gui.domElement.style.display = Flurry.gui.hidden ? 'block' : 'none';
     Flurry.gui.hidden = !Flurry.gui.hidden;
 };
