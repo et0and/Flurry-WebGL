@@ -26,8 +26,9 @@ Flurry.Renderer = function(canvasId)
      * Core WebGL rendering context and methods
      * @type {WebGLRenderingContext}
      */
-    this.gl = this.canvas.getContext('webgl', contextParams)
-        || this.canvas.getContext('experimental-webgl', contextParams);
+    this.gl = this.canvas.getContext('webgl', contextParams);
+
+    if (!this.gl) throw new Error('Could not initialize WebGL');
 
     /**
      * All shaders used by the renderer
@@ -72,33 +73,28 @@ Flurry.Renderer = function(canvasId)
         color    : new Float32Array(16)
     };
 
+    var gl = this.gl;
+
     this.blend = {
-        from : WebGLRenderingContext.SRC_ALPHA,
-        to   : WebGLRenderingContext.ONE,
-        func : WebGLRenderingContext.FUNC_ADD
+        from : gl.SRC_ALPHA,
+        to   : gl.ONE,
+        func : gl.FUNC_ADD
     };
-
-    if (!this.gl)
-        throw new Error('Could not initialize WebGL');
-
-    var gl   = this.gl,
-        GLES = WebGLRenderingContext;
-
-    gl.disable(GLES.DEPTH_TEST);
-    gl.disable(GLES.CULL_FACE);
-    gl.enable(GLES.BLEND);
+    
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.CULL_FACE);
+    gl.enable(gl.BLEND);
 };
 
 Flurry.Renderer.prototype.setup = function()
 {
     var gl      = this.gl,
-        GLES    = WebGLRenderingContext,
         program = gl.createProgram();
 
     this.shaders.forEach( function(s) { gl.attachShader(program, s); });
     gl.linkProgram(program);
 
-    if ( !gl.getProgramParameter(program, GLES.LINK_STATUS) )
+    if ( !gl.getProgramParameter(program, gl.LINK_STATUS) )
         throw new Error( gl.getProgramInfoLog(program) );
 
     gl.useProgram(program);
@@ -119,64 +115,62 @@ Flurry.Renderer.prototype.setup = function()
 
 Flurry.Renderer.prototype.render = function()
 {
-    var gl   = this.gl,
-        GLES = WebGLRenderingContext;
+    var gl = this.gl;
 
     // Fade rect
-    gl.blendEquation(GLES.FUNC_ADD);
-    gl.blendFunc(GLES.SRC_ALPHA, GLES.ONE_MINUS_SRC_ALPHA);
+    gl.blendEquation(gl.FUNC_ADD);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.uniform1i(this.uniforms.drawingRect.id, 1);
-    gl.bindTexture(GLES.TEXTURE_2D, null);
-    gl.bindBuffer(GLES.ARRAY_BUFFER, this.buffers.position.buffer);
-    gl.bufferData(GLES.ARRAY_BUFFER, this.rect.position, GLES.STATIC_DRAW);
-    gl.vertexAttribPointer(this.attributes.position, 2, GLES.FLOAT, false, 0, 0);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, this.rect.position, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(this.attributes.position, 2, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(GLES.ARRAY_BUFFER, this.buffers.color.buffer);
-    gl.bufferData(GLES.ARRAY_BUFFER, this.rect.color, GLES.STATIC_DRAW);
-    gl.vertexAttribPointer(this.attributes.color, 4, GLES.FLOAT, false, 0, 0);
-    gl.drawArrays(GLES.TRIANGLE_STRIP, 0, 4); // Causes a warning on first call due to unbound UV data
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.color.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, this.rect.color, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(this.attributes.color, 4, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); // Causes a warning on first call due to unbound UV data
 
     // Flurry
     gl.blendEquation(this.blend.func);
     gl.blendFunc(this.blend.from, this.blend.to);
     gl.uniform1i(this.uniforms.drawingRect.id, 0);
-    gl.bindTexture(GLES.TEXTURE_2D, Flurry.Texture.ref);
-    gl.bindBuffer(GLES.ARRAY_BUFFER, this.buffers.position.buffer);
-    gl.bufferData(GLES.ARRAY_BUFFER, this.buffers.position.data, GLES.DYNAMIC_DRAW);
-    gl.vertexAttribPointer(this.attributes.position, 2, GLES.FLOAT, false, 0, 0);
+    gl.bindTexture(gl.TEXTURE_2D, Flurry.Texture.ref);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, this.buffers.position.data, gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(this.attributes.position, 2, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(GLES.ARRAY_BUFFER, this.buffers.color.buffer);
-    gl.bufferData(GLES.ARRAY_BUFFER, this.buffers.color.data, GLES.DYNAMIC_DRAW);
-    gl.vertexAttribPointer(this.attributes.color, 4, GLES.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.color.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, this.buffers.color.data, gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(this.attributes.color, 4, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(GLES.ARRAY_BUFFER, this.buffers.uv.buffer);
-    gl.bufferData(GLES.ARRAY_BUFFER, this.buffers.uv.data, GLES.DYNAMIC_DRAW);
-    gl.vertexAttribPointer(this.attributes.uv, 2, GLES.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.uv.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, this.buffers.uv.data, gl.DYNAMIC_DRAW);
+    gl.vertexAttribPointer(this.attributes.uv, 2, gl.FLOAT, false, 0, 0);
 
-    gl.bindBuffer(GLES.ELEMENT_ARRAY_BUFFER, this.buffers.index.buffer);
-    gl.bufferData(GLES.ELEMENT_ARRAY_BUFFER, this.buffers.index.data, GLES.DYNAMIC_DRAW);
-    gl.drawElements(GLES.TRIANGLES, MAX_SMOKE * 3 * 2, GLES.UNSIGNED_SHORT, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffers.index.buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.buffers.index.data, gl.DYNAMIC_DRAW);
+    gl.drawElements(gl.TRIANGLES, MAX_SMOKE * 3 * 2, gl.UNSIGNED_SHORT, 0);
 };
 
 Flurry.Renderer.prototype.useShader = function(id)
 {
     var gl           = this.gl,
-        GLES         = WebGLRenderingContext,
         shaderScript = document.getElementById(id),
         shaderText   = shaderScript.innerHTML,
         shader;
 
     if (shaderScript.type == "x-shader/x-fragment")
-        shader = gl.createShader(GLES.FRAGMENT_SHADER);
+        shader = gl.createShader(gl.FRAGMENT_SHADER);
     else if (shaderScript.type == "x-shader/x-vertex")
-        shader = gl.createShader(GLES.VERTEX_SHADER);
+        shader = gl.createShader(gl.VERTEX_SHADER);
     else
         return null;
 
     gl.shaderSource(shader, shaderText);
     gl.compileShader(shader);
 
-    if ( !gl.getShaderParameter(shader, GLES.COMPILE_STATUS) )
+    if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS) )
         throw new Error( gl.getShaderInfoLog(shader) );
     else
         this.shaders.push(shader);
@@ -208,28 +202,28 @@ Flurry.Renderer.prototype.setFadeColor = function(color)
 
 Flurry.Renderer.prototype.setBlendMode = function(mode)
 {
-    var GLES = WebGLRenderingContext;
+    var gl = this.gl;
     switch (mode)
     {
         case BlendModes.Additive:
-            this.blend.from = GLES.SRC_ALPHA;
-            this.blend.to   = GLES.ONE;
-            this.blend.func = GLES.FUNC_ADD;
+            this.blend.from = gl.SRC_ALPHA;
+            this.blend.to   = gl.ONE;
+            this.blend.func = gl.FUNC_ADD;
             break;
         case BlendModes.Multiply:
-            this.blend.from = GLES.ZERO;
-            this.blend.to   = GLES.SRC_COLOR;
-            this.blend.func = GLES.FUNC_ADD;
+            this.blend.from = gl.ZERO;
+            this.blend.to   = gl.SRC_COLOR;
+            this.blend.func = gl.FUNC_ADD;
             break;
         case BlendModes.Normal:
-            this.blend.from = GLES.SRC_ALPHA;
-            this.blend.to   = GLES.ONE_MINUS_SRC_ALPHA;
-            this.blend.func = GLES.FUNC_ADD;
+            this.blend.from = gl.SRC_ALPHA;
+            this.blend.to   = gl.ONE_MINUS_SRC_ALPHA;
+            this.blend.func = gl.FUNC_ADD;
             break;
         case BlendModes.Subtract:
-            this.blend.from = GLES.ZERO;
-            this.blend.to   = GLES.ONE_MINUS_SRC_COLOR;
-            this.blend.func = GLES.FUNC_SUBTRACT;
+            this.blend.from = gl.ZERO;
+            this.blend.to   = gl.ONE_MINUS_SRC_COLOR;
+            this.blend.func = gl.FUNC_SUBTRACT;
             break;
     }
 };

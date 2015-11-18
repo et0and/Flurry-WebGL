@@ -137,8 +137,7 @@ Flurry.Texture.averageLastAndFirst = function()
  */
 Flurry.Texture.create = function()
 {
-    var gl   = Flurry.renderer.gl,
-        GLES = WebGLRenderingContext;
+    var gl = Flurry.renderer.gl;
 
     for (var i = 0; i < 8; i++)
     for (var j = 0; j < 8; j++)
@@ -163,15 +162,15 @@ Flurry.Texture.create = function()
 
     Flurry.Texture.ref = gl.createTexture();
 
-    gl.bindTexture(GLES.TEXTURE_2D, Flurry.Texture.ref);
+    gl.bindTexture(gl.TEXTURE_2D, Flurry.Texture.ref);
     gl.texImage2D(
-        GLES.TEXTURE_2D, 0,
-        GLES.LUMINANCE_ALPHA, 256, 256, 0,
-        GLES.LUMINANCE_ALPHA,
-        GLES.UNSIGNED_BYTE, bigTexFlat);
-    gl.texParameteri(GLES.TEXTURE_2D, GLES.TEXTURE_MAG_FILTER, GLES.LINEAR);
-    gl.texParameteri(GLES.TEXTURE_2D, GLES.TEXTURE_MIN_FILTER, GLES.LINEAR_MIPMAP_NEAREST);
-    gl.generateMipmap(GLES.TEXTURE_2D);
+        gl.TEXTURE_2D, 0,
+        gl.LUMINANCE_ALPHA, 256, 256, 0,
+        gl.LUMINANCE_ALPHA,
+        gl.UNSIGNED_BYTE, bigTexFlat);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+    gl.generateMipmap(gl.TEXTURE_2D);
 
     // TODO: WebGL (TexEnvF shader?)
     // See http://graphics.snu.ac.kr/class/graphics2011/materials/ch14_glsl.pdf
