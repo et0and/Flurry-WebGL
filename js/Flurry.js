@@ -71,7 +71,7 @@ Flurry.setupGui = function()
     Flurry.stats.domElement.style.top      = '0px';
     document.body.appendChild(Flurry.stats.domElement);
 
-    Flurry.gui.hidden = false;
+    Flurry.gui.hidden = true;
     Flurry.renderer.canvas.onclick = Flurry.toggleGui;
 
     var gui    = Flurry.gui,
